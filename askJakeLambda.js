@@ -106,6 +106,13 @@ const languageStrings = {
 };
 
 const handlers = {
+  'YearMakeModel': function () {
+    let yearName = this.event.request.intent.slots.year.value;
+    let makeName = this.event.request.intent.slots.make.value;
+    let modelName = this.event.request.intent.slots.model.value;
+    this.emit(':tell', 'year is '+ yearName + 'make is '+ makeName + 'model is ' + modelName);
+  },
+
     'Ping': function () {
       let personName = this.event.request.intent.slots.personName.value;
       this.emit(':tell', 'Pong');
