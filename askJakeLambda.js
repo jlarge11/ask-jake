@@ -106,9 +106,8 @@ const languageStrings = {
 };
 
 const handlers = {
-    'Ping': function (intent) {
-      let slotPassed = intent.slots[0].value;
-      this.speak('Pong ' + slotPassed);
+    'Ping': function () {
+      this.emit(':tell', 'Pong');
     },
     'LaunchRequest': function () {
         this.emit('GetFact');
