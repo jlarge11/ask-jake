@@ -1,6 +1,3 @@
-
-
-
 /**
 * This sample shows how to create a Lambda function for handling Alexa Skill requests that:
 * - Web service: communicate with an external web service to get tide data from NOAA CO-OPS API (http://tidesandcurrents.noaa.gov/api/)
@@ -78,6 +75,10 @@ KitchenBot.prototype.eventHandlers.onSessionEnded = function (sessionEndedReques
 * override intentHandlers to map intent handling functions.
 */
 KitchenBot.prototype.intentHandlers = {
+  "Ping": function (intent, session, response) {
+    var speechOutput = "Pong";
+    response.tell(speechOutput);
+  },
   "GetRecipeIntent": function (intent, session, response) {
     handleGetRecipe(intent, session, response);
   },
@@ -276,8 +277,3 @@ exports.handler = function (event, context) {
   var kitchenBot = new KitchenBot();
   kitchenBot.execute(event, context);
 };
-
-    Contact GitHub API Training Shop Blog About 
-
-    © 2017 GitHub, Inc. Terms Privacy Security Status Help 
-
