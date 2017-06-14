@@ -107,6 +107,7 @@ const languageStrings = {
 
 const handlers = {
     'Ping': function () {
+      let personName = this.event.request.intent.slots.personName.value;
       this.emit(':tell', 'Pong');
     },
     'LaunchRequest': function () {
