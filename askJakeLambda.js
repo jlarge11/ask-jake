@@ -107,10 +107,12 @@ const languageStrings = {
 
 const handlers = {
   'YearMakeModel': function () {
-    let yearName = this.event.request.intent.slots.year.value;
-    let makeName = this.event.request.intent.slots.make.value;
-    let modelName = this.event.request.intent.slots.model.value;
-    this.emit(':tell', 'year is '+ yearName + 'make is '+ makeName + 'model is ' + modelName);
+    let slots = this.event.request.intent.slots;
+    let year = slots.year.value;
+    let make = slots.make.value;
+    let model = slots.model.value;
+
+    this.emit(':tell', `year is ${year} make is ${make} model is ${model}`);
   },
 
   'Ping': function () {
