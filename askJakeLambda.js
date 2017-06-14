@@ -106,6 +106,9 @@ const languageStrings = {
 };
 
 const handlers = {
+    'Ping': function () {
+      this.speak('Pong');
+    },
     'LaunchRequest': function () {
         this.emit('GetFact');
     },
