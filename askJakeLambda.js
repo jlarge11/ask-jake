@@ -31,6 +31,10 @@ const handlers = {
     getRecalls(this);
 
   },
+  'GetAgent': function() {
+    this.emit(':tell', "you can contact Rick West.  I'll text you the number" );
+    // TODO:  Text the phone number
+  },
   'AMAZON.HelpIntent': function() {
     const speechOutput = this.t('HELP_MESSAGE');
     const reprompt = this.t('HELP_MESSAGE');
