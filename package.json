@@ -1,0 +1,19 @@
+{
+  "name": "ask-jake",
+  "version": "1.0.0",
+  "description": "",
+  "main": "askJakeLambda.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jlarge1974/ask-jake.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jlarge1974/ask-jake/issues"
+  },
+  "homepage": "https://github.com/jlarge1974/ask-jake#readme"
+}
