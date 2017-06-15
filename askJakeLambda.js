@@ -13,7 +13,6 @@
 const Alexa = require('alexa-sdk');
 const AWS = require('aws-sdk');
 const https = require("https");
-const http = require("http");
 
 const apiKey = "c666snh3xxe9yp2fgf7zxysj";
 
@@ -26,8 +25,12 @@ const handlers = {
     let model = slots.model.value;
 
     getCar(year, make, model, this);
+    this.emit(':tell', 'congrats, noted' );
   },
+'GetRecalls': function() {
+   getRecalls(this);
 
+  },
   'AMAZON.HelpIntent': function() {
     const speechOutput = this.t('HELP_MESSAGE');
     const reprompt = this.t('HELP_MESSAGE');
@@ -40,6 +43,30 @@ const handlers = {
     this.emit(':tell', this.t('STOP_MESSAGE'));
   }
 };
+
+function getRecalls(alexaContext) {
+   console.log('Were in getRecalls');
+   var docClient = new AWS.DynamoDB.DocumentClient();
+
+  var table = "AskJakeCarMaintenance";
+
+  let options = {
+    hostname: "api.edmunds.com",
+    path: `v1/api/maintenance/recallrepository/findbymodelyearid?modelyearid=100523475&fmt=json&api_key=${apiKey}`
+
+  };
+
+  console.log("starting request to " + options.path);
+
+  https.request('https://api.edmunds.com/v1/api/maintenance/recallrepository/findbymodelyearid?modelyearid=100523475&fmt=json&api_key=68da4xqgp74rvhph299vsebk', (res) => {
+    console.log('finished get.  status = ' + res.status);
+    res.on('data', (d) => {
+      var data = JSON.parse(d);
+      console.log(''+ data.recallHolder.length);
+      alexaContext.emit(':tell', `you have ${data.recallHolder.length} recalls`);
+    });
+  }).end();
+}
 
 function getCar(year, make, model) {
   var docClient = new AWS.DynamoDB.DocumentClient();
