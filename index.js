@@ -17,6 +17,9 @@ const https = require("https");
 const apiKey = "f7cg9hpv9wkj65nkh5m7e7fm";
 
 const handlers = {
+  'Khakis': function() {
+    this.emit(':tell', 'Uhh... Khakis?' );
+  },
   'YearMakeModel': function() {
     console.log('howdy ho!');
     let slots = this.event.request.intent.slots;
