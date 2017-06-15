@@ -14,7 +14,7 @@ const Alexa = require('alexa-sdk');
 const AWS = require('aws-sdk');
 const https = require("https");
 
-const apiKey = "68da4xqgp74rvhph299vsebk";
+const apiKey = "f7cg9hpv9wkj65nkh5m7e7fm";
 
 const handlers = {
   'YearMakeModel': function() {
@@ -31,8 +31,22 @@ const handlers = {
     getRecalls(this);
   },
   'GetAgent': function() {
-    this.emit(':tell', "you can contact Rick West.  I'll text you the number" );
-    // TODO:  Text the phone number
+    let agentName = 'Mary Contreras';
+
+    var speechOutput = `Looks like you can contact ${agentName}.  I'll send you the number`;
+    var repromptSpeech = 'Reprompting';
+    var cardTitle = 'Agent Contact';
+    var cardContent = `${agentName}'s phone number is 309-555-1234`;
+
+    var imageObj = {
+      smallImageUrl: 'https://plus.google.com/u/0/photos/albums/p5rpljfv8u3qi5es540h86h5165sdo63a?pid=6431743030394494834&oid=101894744486224382452',
+      largeImageUrl: 'https://imgs.xkcd.com/comics/standards.png'
+    };
+
+    var permissionArray = ['read::alexa:device:all:address'];
+
+    this.emit(':tellWithCard', speechOutput, cardTitle, cardContent, imageObj);
+    // this.emit(':tell', "you can contact Rick West at 309-555-1234");
   },
   'AMAZON.HelpIntent': function() {
     const speechOutput = this.t('HELP_MESSAGE');
@@ -68,14 +82,23 @@ function getRecalls(alexaContext) {
       // console.log("Scan succeeded." + JSON.stringify(data.Items[0].modelYearId));
       // let url = `https://api.edmunds.com/v1/api/maintenance/recallrepository/findbymodelyearid?modelyearid=${data.Items[0].modelYearId}&fmt=json&api_key=68da4xqgp74rvhph299vsebk`;
 
-      let url = `https://api.edmunds.com/v1/api/maintenance/recallrepository/findbymodelyearid?modelyearid=100523475&fmt=json&api_key=68da4xqgp74rvhph299vsebk`;
+      let url = `https://api.edmunds.com/v1/api/maintenance/recallrepository/findbymodelyearid?modelyearid=100523475&fmt=json&api_key=${apiKey}`;
       https.request(url, (res) => {
         console.log('finished get.  status = ' + res.status);
         res.on('data', (d) => {
           var data = JSON.parse(d);
           console.log(''+ data.recallHolder.length);
-          // TODO:  Send a text
-          alexaContext.emit(':tell', `you have ${data.recallHolder.length} recalls.  Sending a text with more information`);
+          let cardTitle = "Your Vehicle's Recalls";
+          let speechOutput = `There are ${data.recallHolder.length} recalls on your vehicle.  I'll send you more information`;
+          let cardContent = '';
+
+          data.recallHolder.forEach((recallItem) => {
+            cardContent += recallItem.recallNumber + '\r\n';
+          });
+
+          cardContent += '\r\nYou can contact your nearest Ford Service Center at 309-555-9876';
+
+          alexaContext.emit(':tellWithCard', speechOutput, cardTitle, cardContent);
         });
       }).end();
     }
