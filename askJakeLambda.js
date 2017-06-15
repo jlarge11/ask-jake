@@ -29,7 +29,6 @@ const handlers = {
   },
   'GetRecalls': function() {
     getRecalls(this);
-
   },
   'GetAgent': function() {
     this.emit(':tell', "you can contact Rick West.  I'll text you the number" );
