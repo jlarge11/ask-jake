@@ -42,7 +42,7 @@ const handlers = {
       console.log(params);
       console.log("Adding a new item...");
       createNewVehicle(params).then(() => {
-        this.emit(':tell', `Congrats, Noted`);
+        this.emit(':tell', `Congratulations!  Don't forget to contact your State Farm agent.`);
         console.log('Finished');
       });
     });
