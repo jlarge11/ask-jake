@@ -15,7 +15,7 @@ const Axios = require('axios');
 const AWS = require('aws-sdk');
 const https = require("https");
 
-const apiKey = "nn54mh9tyr57vmfn5mb8g3er";
+const apiKey = "f7cg9hpv9wkj65nkh5m7e7fm";
 
 const handlers = {
   'Khakis': function() {
