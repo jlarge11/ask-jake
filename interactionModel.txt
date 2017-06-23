@@ -1,0 +1,39 @@
+Intents
+  YearMakeModel
+    slots
+      year - AMAZON.NUMBER
+      make - LIST_OF_MAKES
+      model - LIST_OF_MODELS
+
+    utterances
+      to remember that I bought a {year} {make} {model}
+      i got a {year} {make} {model}
+      I bought a {year} {make} {model}
+
+  GetAgent
+    utterances
+      to send me my agent's contact information
+      Can you find my agent's contact information
+      Can you find my agent's contact info
+      to send me my agent's contact info
+
+  GetRecalls
+    utterances
+      Are there any recalls on my vehicle
+      if there are any recalls on my vehicle
+      Are there any recalls
+      Are there any recalls on my car
+
+  Khakis
+    utterances
+      what are you wearing
+
+Slot Types
+  LIST_OF_MAKES
+    ford
+    toyota
+    nissan
+    chevrolet
+
+  LIST_OF_MODELS
+    fiesta
