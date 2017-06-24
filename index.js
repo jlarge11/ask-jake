@@ -14,13 +14,16 @@ const Alexa = require('alexa-sdk');
 const Axios = require('axios');
 const AWS = require('aws-sdk');
 const https = require("https");
+const AlexaDeviceAddressClient = require('./AlexaDeviceAddressClient');
 
-const apiKey = "f7cg9hpv9wkj65nkh5m7e7fm";
+const apiKey = "nn54mh9tyr57vmfn5mb8g3er";
+const TABLE = "AskJakeDB";
 
 const handlers = {
   'Khakis': function() {
     this.emit(':tell', `<prosody rate="50%" pitch="low">auh...</prosody><prosody rate="slow" pitch="low"> Khakis?.</prosody>`);
   },
+
   'YearMakeModel': function() {
     console.log('howdy ho!');
     let slots = this.event.request.intent.slots;
@@ -28,32 +31,49 @@ const handlers = {
     let make = slots.make.value;
     let model = slots.model.value;
 
-    let table = "AskJakeDB";
-    getCar(year, make, model).then((response) => {
-      console.log(response.data.id);
+    let speech = 'Congratulations!';
 
-      var params = {
-        TableName: table,
-        Item: {
-          "modelYearId": response.data.id
-        }
-      };
+    getVehicleFromDB().then((dbResponse) => {
+      if(dbResponse.Items.length >= 1) {
+          speech += ' Your new vehicle will now be referenced when asking about vehicle information.'
+          dbResponse.Items.forEach((vehicle) => {
+            deleteVehicleFromDB(vehicle);
+          });
+      }
 
-      console.log(params);
-      console.log("Adding a new item...");
-      createNewVehicle(params).then(() => {
-        this.emit(':tell', `Congratulations!  Don't forget to contact your State Farm agent.`);
-        console.log('Finished');
+      getVehicleFromAPI(year, make, model).then((response) => {
+        console.log(response.data.id);
+
+        var params = {
+          TableName: TABLE,
+          Item: {
+            "modelYearId": response.data.id,
+            "info": {
+                "year": year,
+                "make": make,
+                "model": model
+            }
+          }
+        };
+
+        console.log(params);
+        console.log("Adding a new item...");
+        speech += ` Don't forget to contact your State Farm agent.`;
+        createNewVehicle(params).then(() => {
+          this.emit(':tell', speech);
+          console.log('Finished');
+        });
       });
     });
   },
+
   'GetRecalls': function() {
-    getRecalls().then((resolved) => {
+    getRecalls().then((response) => {
       let cardTitle = "Your Vehicle's Recalls";
-      let speechOutput = `There are ${resolved.data.recallHolder.length} recalls on your vehicle.  I'll send you more information`;
+      let speechOutput = `There are ${response.data.recallHolder.length} recalls on your vehicle.  I'll send you more information`;
       let cardContent = '';
 
-      resolved.data.recallHolder.forEach((recallItem) => {
+      response.data.recallHolder.forEach((recallItem) => {
         cardContent += recallItem.recallNumber + '\r\n';
       });
 
@@ -61,6 +81,7 @@ const handlers = {
       this.emit(':tellWithCard', speechOutput, cardTitle, cardContent);
     });
   },
+
   'GetAgent': function() {
     let agentName = 'Mary Contreras';
 
@@ -77,38 +98,97 @@ const handlers = {
     var permissionArray = ['read::alexa:device:all:address'];
 
     this.emit(':tellWithCard', speechOutput, cardTitle, cardContent, imageObj);
-    // this.emit(':tell', "you can contact Rick West at 309-555-1234");
   },
+
+  'FindNearestDealership': function() {
+    getDeviceAddress(this).then((addressResponse) => {
+      const postalCode = addressResponse.address.postalCode;
+      getVehicleFromDB().then((dbResponse) => {
+        const make = dbResponse.Items[0].info.make;
+        findClosestDealerships(postalCode, make).then((response) => {
+          const dealer = response.data.dealers[0];
+          const speechOutput = `Your zipcode was ${postalCode}. Your closest ${make} dealership is ${dealer.name} on ${dealer.address.street} in ${dealer.address.city}`;
+          const cardContent = `${dealer.name}\r\n${dealer.address.street}\r\n${dealer.address.city},${dealer.address.stateName}\r\n${dealer.address.zipcode}`;
+          this.emit(':tellWithCard', speechOutput, 'Closest Dealership', cardContent);
+        });
+      });
+    });
+  },
+
   'AMAZON.HelpIntent': function() {
     const speechOutput = this.t('HELP_MESSAGE');
     const reprompt = this.t('HELP_MESSAGE');
     this.emit(':ask', speechOutput, reprompt);
   },
+
   'AMAZON.CancelIntent': function() {
     this.emit(':tell', this.t('STOP_MESSAGE'));
   },
+
   'AMAZON.StopIntent': function() {
     this.emit(':tell', this.t('STOP_MESSAGE'));
+  },
+
+  'Unhandled': function() {
+        this.emit(':ask', 'Sorry, I didn\'t get that. Asking about vehicle information.', 'Try asking about vehicle information.');
   }
 };
+
+function findClosestDealerships(postalCode, vehicleMake) {
+  return Axios({
+    method: 'get',
+    url: `http://api.edmunds.com/api/dealer/v2/dealers/?zipcode=${postalCode}&make=${vehicleMake}&pageNum=1&pageSize=1&sortby=distance%3AASC&view=basic&api_key=${apiKey}`
+  });
+}
+
+function checkAddress(alexa, addressResponse) {
+  switch(addressResponse.statusCode) {
+    case 200:
+        console.log("Address successfully retrieved, now responding to user.");
+        const address = addressResponse.address;
+
+        const ADDRESS_MESSAGE =
+            `${address['addressLine1']}, ${address['stateOrRegion']}, ${address['postalCode']}`;
+
+        alexa.emit(":tell", ADDRESS_MESSAGE);
+        break;
+    case 204:
+        // This likely means that the user didn't have their address set via the companion app.
+        console.log("Successfully requested from the device address API, but no address was returned.");
+        alexa.emit(":tell", 'No address');
+        break;
+    case 403:
+        console.log("The consent token we had wasn't authorized to access the user's address.");
+        alexa.emit(":tell", 'No permission');
+        break;
+    default:
+        alexa.emit(":tell", 'I broke');
+  }
+}
 
 function createNewVehicle(params) {
   let docClient = new AWS.DynamoDB.DocumentClient();
   return docClient.put(params).promise();
 }
 
+function getDeviceAddress(alexa) {
+  const consentToken = alexa.event.context.System.user.permissions.consentToken;
+  const deviceId = alexa.event.context.System.device.deviceId;
+  const apiEndpoint = alexa.event.context.System.apiEndpoint
+  const alexaDeviceAddressClient = new AlexaDeviceAddressClient(apiEndpoint, deviceId, consentToken);
+
+  return alexaDeviceAddressClient.getCountryAndPostalCode();
+}
+
 function getRecalls() {
   console.log('Were in getRecalls');
-  let docClient = new AWS.DynamoDB.DocumentClient();
-
-  let table = "AskJakeDB";
 
   let params = {
-    TableName: table
+    TableName: TABLE
   };
 
   console.log("Scanning table.");
-
+  let docClient = new AWS.DynamoDB.DocumentClient();
   return docClient.scan(params).promise().then((data, err) => {
     if (err) {
       console.error("Unable to scan the table. Error JSON:", JSON.stringify(err, null, 2));
@@ -124,7 +204,29 @@ function getRecalls() {
   });
 }
 
-function getCar(year, make, model) {
+function getVehicleFromDB() {
+  let params = {
+    TableName: TABLE
+  };
+
+  console.log("Scanning table.");
+  let docClient = new AWS.DynamoDB.DocumentClient();
+  return docClient.scan(params).promise();
+}
+
+function deleteVehicleFromDB(vehicle) {
+  console.log(vehicle);
+  let params = {
+    TableName: TABLE,
+    Key: {
+      "modelYearId" : vehicle.modelYearId
+    }
+  }
+  let docClient = new AWS.DynamoDB.DocumentClient();
+  return docClient.delete(params).promise();
+}
+
+function getVehicleFromAPI(year, make, model) {
 
   console.log("starting request");
   let options = {

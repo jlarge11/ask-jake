@@ -1,0 +1,44 @@
+{
+  "session": {
+    "sessionId": "SessionId.0b6cfd7a-79e4-4451-ae2a-0b692a6d54c8",
+    "application": {
+      "applicationId": "amzn1.ask.skill.c325a3eb-0b4c-406c-aa32-519647c3946e"
+    },
+    "attributes": {},
+    "user": {
+      "userId": "amzn1.ask.account.AHB2D6UNPBDMJQ52HIEI4YCYGEOURQP25JAQIXB5IVAMHHXTUHRFHBFAOXF4NJAYUO7XMWS5V52SOE67B7WJPC3VAOJ4J62Z2UIRUS7FGMAHOUIXI7ACEBYDKAJYQBWSRMVNFQYWODMX27ZAUPSY7UD637GWNORUKCIIZKZNSFUXIJWYLBYPMAH3STRIDXQBRDH5SIJYP52QQJQ"
+    },
+    "new": true
+  },
+  "request": {
+    "type": "IntentRequest",
+    "requestId": "EdwRequestId.a1ecb8fa-b9e3-472a-95f8-f90d3ae525be",
+    "locale": "en-US",
+    "timestamp": "2017-06-24T21:51:40Z",
+    "intent": {
+      "name": "YearMakeModel",
+      "slots": {
+        "year": {
+          "name": "year",
+          "value": "2013"
+        },
+        "qualifier": {
+          "name": "qualifier"
+        },
+        "model": {
+          "name": "model",
+          "value": "sonic"
+        },
+        "make": {
+          "name": "make",
+          "value": "Chevrolet"
+        },
+        "purchaseWord": {
+          "name": "purchaseWord",
+          "value": "purchased"
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

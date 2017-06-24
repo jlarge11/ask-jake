@@ -1,7 +1,7 @@
 {
   "name": "ask-jake",
   "version": "1.0.0",
-  "description": "",
+  "description": "Alexa app",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,10 +10,17 @@
     "type": "git",
     "url": "git+https://github.com/jlarge1974/ask-jake.git"
   },
-  "author": "",
+  "author": "Adam Hilgenberg",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/jlarge1974/ask-jake/issues"
   },
-  "homepage": "https://github.com/jlarge1974/ask-jake#readme"
+  "homepage": "https://github.com/jlarge1974/ask-jake#readme",
+  "dependencies": {
+    "alexa-sdk": "^1.0.10",
+    "aws-sdk": "^2.77.0",
+    "axios": "^0.16.2",
+    "https": "^1.0.0"
+  },
+  "devDependencies": {}
 }
